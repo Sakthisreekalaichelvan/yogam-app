@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Register</title>
+  <title>Login</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 40px 20px;
+      margin: 0;
       background: url('assets/images/wallpapers/Login and Register.jpeg') no-repeat center center fixed;
       background-size: cover;
-      color: #fff;
       text-align: center;
+      color: white;
       min-height: 100vh;
       box-sizing: border-box;
-      margin: 0;
     }
 
     .logo {
@@ -25,14 +25,14 @@
 
     h2 {
       font-size: 2em;
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
       margin-bottom: 20px;
     }
 
-    .register-img {
-      width: 250px;
+    .login-img {
+      width: 200px;
       height: auto;
-      margin: 15px auto;
+      margin: 20px auto;
       display: block;
     }
 
@@ -54,71 +54,46 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      margin: 10px auto;
+      margin-top: 15px;
       font-size: 1em;
       width: 85%;
       max-width: 350px;
     }
 
     button:hover {
-      background: #444edd;
-    }
-
-    #otpInput, #verifyBtn {
-      display: none;
+      background: #3f4cc1;
     }
   </style>
 </head>
 <body>
-  <!-- Logo -->
-  <img src="assets/images/wallpapers/logo.png" alt="Logo" class="logo" />
+  <!-- Logo image -->
+  <img src="assets/images/wallpapers/logo.png" alt="App Logo" class="logo" />
 
-  <h2>Register</h2>
+  <h2>Login</h2>
 
-  <!-- Registration-themed image -->
-  <img src="assets/images/wallpapers/register.jpg" alt="Register Icon" class="register-img" />
+  <!-- Login-themed image -->
+  <img src="assets/images/wallpapers/login.jpg" alt="Login Icon" class="login-img" />
 
-  <input type="text" id="name" placeholder="Name" />
-  <input type="number" id="age" placeholder="Age" />
-  <input type="email" id="email" placeholder="Email" />
-  <input type="password" id="password" placeholder="Password" />
-  <button onclick="generateOTP()">Send OTP</button>
-  <input type="text" id="otpInput" placeholder="Enter OTP" />
-  <button onclick="validateOTP()" id="verifyBtn">Verify & Register</button>
+  <input type="email" id="loginEmail" placeholder="Email" />
+  <input type="password" id="loginPassword" placeholder="Password" />
+  <button onclick="login()">Login</button>
 
   <script>
-    let generatedOTP = "";
+    function login() {
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
 
-    function generateOTP() {
-      const email = document.getElementById("email").value;
-      if (!email) return alert("Enter Email");
+      const storedUser = localStorage.getItem(email);
+      if (!storedUser) return alert("User not found");
 
-      generatedOTP = Math.floor(100000 + Math.random() * 900000);
-      alert("Your OTP is: " + generatedOTP);
-
-      document.getElementById("otpInput").style.display = "block";
-      document.getElementById("verifyBtn").style.display = "block";
-    }
-
-    function validateOTP() {
-      const enteredOTP = document.getElementById("otpInput").value;
-      if (enteredOTP != generatedOTP) return alert("Incorrect OTP");
-
-      const name = document.getElementById("name").value;
-      const age = document.getElementById("age").value;
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-
-      if (!name || !age || !email || !password) {
-        alert("Please fill all fields");
+      const userObj = JSON.parse(storedUser);
+      if (userObj.password !== password) {
+        alert("Incorrect password");
         return;
       }
 
-      const user = { name, age, email, password };
-      localStorage.setItem(email, JSON.stringify(user));
-
-      alert("Registration successful! Redirecting to Login...");
-      window.location.href = "login.html";
+      alert("Login successful!");
+      window.location.href = "dashboard.html";
     }
   </script>
 </body>
