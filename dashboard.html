@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: url("assets/images/wallpapers/dashboard.jpeg") no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      padding: 40px 20px;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .logo {
+      width: 130px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 2.2em;
+      margin-bottom: 30px;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+      color:blue;
+    }
+
+    .menu {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      width: 100%;
+      max-width: 1000px;
+      justify-items: center;
+    }
+
+    .menu a {
+      width: 100%;
+      max-width: 280px;
+      height: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      color: #341fed;
+      font-size: 20px;
+      font-weight: bold;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+      transition: transform 0.3s ease, background 0.3s ease;
+      text-align: center;
+    }
+
+    .menu a:hover {
+      transform: scale(1.05);
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .menu img {
+      width: 140px;
+      height: 140px;
+      margin-right: 10px;
+    }
+    @media (max-width: 768px) {
+      .menu {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      .menu a {
+        max-width: 220px;
+        height: 240px;
+      }
+
+      .menu img {
+        width: 100px;
+        height: 100px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Logo at the top -->
+  <img src="assets\images\wallpapers\logo.png" alt="App Logo" class="logo">
+
+  <h2>Welcome! Choose a Topic</h2>
+
+  <div class="menu">
+    <a href="pages/Animals.html"><img src="assets\images\dashboard\animals.jpg" alt="Animals">Animals</a>
+    <a href="pages/Birds.html"><img src="assets\images\dashboard\birds.jpg" alt="Birds">Birds</a>
+    <a href="pages/Vehicles.html"><img src="assets\images\dashboard\vehicles.jpg" alt="Vehicles">Vehicles</a>
+    <a href="pages/Numbers.html"><img src="assets\images\dashboard\numbers.jpeg" alt="Numbers">Numbers</a>
+    <a href="pages/Testing-fruits.html"><img src="assets\images\dashboard\fruits.jpg" alt="Fruits">Fruits</a>
+    <a href="pages/Vegetables.html"><img src="assets\images\dashboard\vegetable.jpeg" alt="Fruits">Vegetables</a>
+  </div>
+</body>
+</html>

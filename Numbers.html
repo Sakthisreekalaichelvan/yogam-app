@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tamil Learning App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html, body {
+            height: 100%;
+            width: 100%;
+            font-family: 'Times New Roman', serif;
+            background-color: darkblue;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center; 
+        }
+        .container {
+            width: 90%;
+            max-width: 500px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            text-align: center;
+        }
+        button {
+            background-color: lightblue;
+            color: black;
+            border: none;
+            padding: 15px 25px;
+            font-size: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 80%;
+        }
+        button:hover {
+            background-color: deepskyblue;
+        }
+        img {
+            width: 100%;
+            max-width: 300px;
+            margin: 20px auto;
+            display: block;
+            border-radius: 10px;
+        }
+        h1, h2, p {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="welcome">
+        <img src="assets/images/dashboard/numbers.jpeg" alt="Welcome">
+        <h1>மதிய வணக்கம்</h1>
+        <button onclick="loginUser()">உள்நுழை</button>
+    </div>
+    
+    <div class="container" id="training" style="display:None;">
+        <img id="NumberImage" src="assets/images/FirstPage/NumberFirstPage.jpeg" alt="Training">
+        <h2>தமிழில் எண்கள்</h2>
+        <p id="NumberName"></p>
+        <button onclick="startTraining()">பயிற்சி தொடங்குக</button>
+    </div>
+    
+    <div class="container" id="thankYou" style="display:none;">
+        <img src="assets/images/wallpapers/logo.png" alt="Thank You">
+        <h2>நன்றி! தமிழில் எண்கள் நீங்கள் கற்றுக்கொண்டீர்கள்!</h2>
+    </div>
+
+    <script>
+        let speaking = false;
+        let recognitionActive = false;
+        const numbers = [
+            { name: "ஒன்று", image: "assets/images/Numbers/Number 1.jpeg" },
+            { name: "இரண்டு", image: "assets/images/Numbers/Numbers 2.jpeg" },
+            { name: "மூன்று", image: "assets/images/Numbers/Numbers 3.jpeg" },
+            { name: "நான்கு", image: "assets/images/Numbers/Numbers 4.jpeg" },
+            { name: "ஐந்து", image: "assets/images/Numbers/Numbers 4.jpeg" },
+            { name: "ஆறு", image: "assets/images/Numbers/Numbers 5.jpeg" },
+            { name: "ஏழு", image: "assets/images/Numbers/Number 6.jpeg" },
+            { name: "எட்டு", image: "assets/images/Numbers/Number 7.jpeg" },
+            { name: "ஒன்பது", image: "assets/images/Numbers/Number 8.jpeg"},
+            { name: "பத்து", image: "assets/images/Numbers/Number 9.jpeg"}
+        ];
+        let index = 0;
+        let attempts = 0;
+        const maxAttempts = 3;
+
+        function showPage(page) {
+            document.querySelectorAll('.container').forEach(el => el.style.display = 'none');
+            document.getElementById(page).style.display = 'block';
+        }
+
+        function loginUser() {
+            alert("உள்நுழைவு வெற்றிகரமாக முடிந்தது!");
+            showPage("training");
+        }
+
+        function speak(text, callback) {
+            if (speaking) return;
+            speaking = true;
+            let audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=gtx&tl=ta&q=${encodeURIComponent(text)}`;
+            let audio = new Audio(audioUrl);
+            audio.onended = function () {
+                speaking = false;
+                if (callback) callback();
+            };
+            audio.play();
+        }
+
+        function startTraining() {
+            if (index < numbers.length) {
+                let number = numbers[index];
+                document.getElementById('NumberName').innerText = number.name;
+                document.getElementById('NumberImage').src = number.image;
+                attempts = 0;
+                speak(number.name, () => verifyUserSpeech(number.name));
+            } else {
+                speak("நன்றி! தமிழில் எண்கள் நீங்கள் கற்றுக்கொண்டீர்கள்!", () => showPage('thankYou'));
+            }
+        }
+
+        function verifyUserSpeech(correctWord) {
+            if (recognitionActive) return;
+            recognitionActive = true;
+            
+            let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'ta-IN';
+            recognition.start();
+            
+            let timeout = setTimeout(() => {
+                recognitionActive = false;
+                if (attempts < maxAttempts) {
+                    attempts++;
+                    speak("உங்களுக்கு என்ன ஆச்சு? அந்த வார்த்தையை திரும்பவும் சொல்லுங்கள்.", () => verifyUserSpeech(correctWord));
+                } else {
+                    speak("நீங்கள் முயற்சியை நிறைவு செய்துவிட்டீர்கள். அடுத்த வார்த்தைக்கு செல்லலாம்.", () => {
+                        index++;
+                        startTraining();
+                    });
+                }
+            }, 7000);
+
+            recognition.onresult = function (event) {
+                clearTimeout(timeout);
+                recognitionActive = false;
+                let userSpeech = event.results[0][0].transcript.trim();
+
+                if (userSpeech === correctWord) {
+                    speak("நன்றாகப் பேசினீர்! அடுத்த வார்த்தைக்கு செல்லலாம்.", () => {
+                        index++;
+                        setTimeout(startTraining, 2000);
+                    });
+                } else {
+                    if (attempts < maxAttempts) {
+                        attempts++;
+                        speak("மீண்டும் முயற்சிக்கவும்: " + correctWord, () => verifyUserSpeech(correctWord));
+                    } 
+                }
+            };
+
+            recognition.onerror = function () {
+                clearTimeout(timeout);
+                recognitionActive = false;
+                if (attempts < maxAttempts) {
+                    attempts++;
+                    speak("உங்களுக்கு என்ன ஆச்சு? அந்த வார்த்தையை திரும்பவும் சொல்லுங்கள்.", () => verifyUserSpeech(correctWord));
+                } 
+            };
+
+            recognition.onend = function () {
+                recognitionActive = false;
+            };
+        }
+    </script>
+</body>
+</html>

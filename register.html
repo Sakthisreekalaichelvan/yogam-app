@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px 20px;
+      background: url('assets/images/wallpapers/Login and Register.jpeg') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      text-align: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+      margin: 0;
+    }
+
+    .logo {
+      width: 100px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 2em;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+      margin-bottom: 20px;
+    }
+
+    .register-img {
+      width: 250px;
+      height: auto;
+      margin: 15px auto;
+      display: block;
+    }
+
+    input {
+      display: block;
+      margin: 10px auto;
+      padding: 12px;
+      width: 85%;
+      max-width: 350px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+    }
+
+    button {
+      padding: 12px 25px;
+      background: #5c67f2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 10px auto;
+      font-size: 1em;
+      width: 85%;
+      max-width: 350px;
+    }
+
+    button:hover {
+      background: #444edd;
+    }
+
+    #otpInput, #verifyBtn {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Logo -->
+  <img src="assets/images/wallpapers/logo.png" alt="Logo" class="logo" />
+
+  <h2>Register</h2>
+
+  <!-- Registration-themed image -->
+  <img src="assets/images/wallpapers/register.jpg" alt="Register Icon" class="register-img" />
+
+  <input type="text" id="name" placeholder="Name" />
+  <input type="number" id="age" placeholder="Age" />
+  <input type="email" id="email" placeholder="Email" />
+  <input type="password" id="password" placeholder="Password" />
+  <button onclick="generateOTP()">Send OTP</button>
+  <input type="text" id="otpInput" placeholder="Enter OTP" />
+  <button onclick="validateOTP()" id="verifyBtn">Verify & Register</button>
+
+  <script>
+    let generatedOTP = "";
+
+    function generateOTP() {
+      const email = document.getElementById("email").value;
+      if (!email) return alert("Enter Email");
+
+      generatedOTP = Math.floor(100000 + Math.random() * 900000);
+      alert("Your OTP is: " + generatedOTP);
+
+      document.getElementById("otpInput").style.display = "block";
+      document.getElementById("verifyBtn").style.display = "block";
+    }
+
+    function validateOTP() {
+      const enteredOTP = document.getElementById("otpInput").value;
+      if (enteredOTP != generatedOTP) return alert("Incorrect OTP");
+
+      const name = document.getElementById("name").value;
+      const age = document.getElementById("age").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      if (!name || !age || !email || !password) {
+        alert("Please fill all fields");
+        return;
+      }
+
+      const user = { name, age, email, password };
+      localStorage.setItem(email, JSON.stringify(user));
+
+      alert("Registration successful! Redirecting to Login...");
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>
