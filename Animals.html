@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tamil Learning App</title>
+    <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
     <style>
         * {
             margin: 0;
@@ -18,7 +19,7 @@
             color: white;
             display: flex;
             justify-content: center;
-            align-items: center; 
+            align-items: center;
         }
         .container {
             width: 90%;
@@ -56,18 +57,18 @@
 </head>
 <body>
     <div class="container" id="welcome">
-        <img src="assets/images/dashboard/animals.jpg" alt="Welcome">
+        <img src="assets/images/dashboard/animals.jpeg" alt="Welcome">
         <h1>மதிய வணக்கம்</h1>
         <button onclick="loginUser()">உள்நுழை</button>
     </div>
-    
+
     <div class="container" id="training" style="display: none;">
         <img id="AnimalImage" src="assets/images/FirstPage/AnimalFirstPage.jpeg" alt="Training">
         <h2>தமிழில் விலங்குகள்</h2>
         <p id="AnimalName"></p>
         <button onclick="startTraining()">பயிற்சி தொடங்குக</button>
     </div>
-    
+
     <div class="container" id="thankYou" style="display: none;">
         <img src="assets/images/wallpapers/logo.png" alt="Thank You">
         <h2>நன்றி! தமிழில் விலங்குகள் நீங்கள் கற்றுக்கொண்டீர்கள்!</h2>
@@ -77,15 +78,14 @@
         const animals = [
             { name: "நாய்", image: "assets/images/Animals/Dog.jpg" },
             { name: "பூனை", image: "assets/images/Animals/cat.jpg" },
-            { name: "மான்", image: "assets/images/Animals/Deer.jpg" },
             { name: "யானை", image: "assets/images/Animals/elephant.jpg" },
             { name: "குதிரை", image: "assets/images/Animals/horse.jpg" },
             { name: "சிங்கம்", image: "assets/images/Animals/lion.jpg" },
             { name: "புலி", image: "assets/images/Animals/Tiger.jpg" },
             { name: "ஆடு", image: "assets/images/Animals/Goat.jpg" },
-            { name: "முயல்", image: "assets/images/Animals/rabbit.jpg"},
-            { name: "ஒட்டகச்சிவிங்கி", image: "assets/images/Animals/girafee.jpg"},
-            { name: "குரங்கு", image: "assets/images/Animals/Monkey.jpg"}
+            { name: "முயல்", image: "assets/images/Animals/rabbit.jpg" },
+            { name: "ஒட்டகச்சிவிங்கி", image: "assets/images/Animals/girafee.jpg" },
+            { name: "குரங்கு", image: "assets/images/Animals/Monkey.jpg" }
         ];
 
         let index = 0;
@@ -103,12 +103,9 @@
         }
 
         function speak(text, callback) {
-            let audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=gtx&tl=ta&q=${encodeURIComponent(text)}`;
-            let audio = new Audio(audioUrl);
-            audio.onended = function () {
-                if (callback) callback();
-            };
-            audio.play();
+            responsiveVoice.speak(text, "Tamil Female", {
+                onend: callback
+            });
         }
 
         function startTraining() {
@@ -126,6 +123,9 @@
         function verifyUserSpeech(correctWord) {
             let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             recognition.lang = 'ta-IN';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
             recognition.start();
 
             let timeout = setTimeout(() => {
@@ -141,7 +141,7 @@
                 }
             }, 7000);
 
-            recognition.onresult = function (event) {
+            recognition.onresult = (event) => {
                 clearTimeout(timeout);
                 let result = event.results[0][0].transcript.trim();
                 if (result === correctWord) {
@@ -162,7 +162,7 @@
                 }
             };
 
-            recognition.onerror = function () {
+            recognition.onerror = () => {
                 clearTimeout(timeout);
                 if (attempts < maxAttempts) {
                     attempts++;
