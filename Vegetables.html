@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tamil Learning App</title>
+    <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
     <style>
         * {
             margin: 0;
@@ -60,22 +61,20 @@
         <h1>மதிய வணக்கம்</h1>
         <button onclick="loginUser()">உள்நுழை</button>
     </div>
-    
-    <div class="container" id="training" style="display:None;">
+
+    <div class="container" id="training" style="display: none;">
         <img id="vegetableImage" src="assets/images/FirstPage/VegetableFirstPage.jpeg" alt="Training">
         <h2>தமிழில் காய்கறிகள்</h2>
         <p id="VegetableName"></p>
         <button onclick="startTraining()">பயிற்சி தொடங்குக</button>
     </div>
-    
-    <div class="container" id="thankYou" style="display:none;">
+
+    <div class="container" id="thankYou" style="display: none;">
         <img src="assets/images/wallpapers/logo.png" alt="Thank You">
         <h2>நன்றி! தமிழில் காய்கறிகள் நீங்கள் கற்றுக்கொண்டீர்கள்!</h2>
     </div>
 
     <script>
-        let speaking = false;
-        let recognitionActive = false;
         const vegetables = [
             { name: "கேரட்", image: "assets/images/Vegetables/Carrot.jpg" },
             { name: "உருளைக்கிழங்கு", image: "assets/images/Vegetables/potato.jpg" },
@@ -87,13 +86,14 @@
             { name: "வாழைக்காய்", image: "assets/images/Vegetables/raw banana.jpg" },
             { name: "பாகற்காய்", image: "assets/images/Vegetables/bitter guard.jpg" }
         ];
+
         let index = 0;
         let attempts = 0;
         const maxAttempts = 3;
 
-        function showPage(page) {
+        function showPage(pageId) {
             document.querySelectorAll('.container').forEach(el => el.style.display = 'none');
-            document.getElementById(page).style.display = 'block';
+            document.getElementById(pageId).style.display = 'block';
         }
 
         function loginUser() {
@@ -102,100 +102,76 @@
         }
 
         function speak(text, callback) {
-            if (speaking) return;
-
-            function trySpeak() {
-                speaking = true;
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'ta-IN';
-
-                const voices = speechSynthesis.getVoices();
-                const tamilVoice = voices.find(v => v.lang === 'ta-IN') || voices.find(v => v.lang.startsWith('en'));
-                if (tamilVoice) utterance.voice = tamilVoice;
-
-                utterance.onend = function () {
-                    speaking = false;
-                    if (callback) callback();
-                };
-
-                utterance.onerror = function () {
-                    console.error("Speech failed.");
-                    speaking = false;
-                    if (callback) callback();
-                };
-
-                speechSynthesis.speak(utterance);
-            }
-
-            if (speechSynthesis.getVoices().length === 0) {
-                speechSynthesis.onvoiceschanged = trySpeak;
-            } else {
-                trySpeak();
-            }
+            responsiveVoice.speak(text, "Tamil Female", {
+                onend: callback
+            });
         }
 
         function startTraining() {
             if (index < vegetables.length) {
-                let vegetable = vegetables[index];
-                document.getElementById('VegetableName').innerText = vegetable.name;
-                document.getElementById('vegetableImage').src = vegetable.image;
+                let veg = vegetables[index];
+                document.getElementById('VegetableName').innerText = veg.name;
+                document.getElementById('vegetableImage').src = veg.image;
                 attempts = 0;
-                speak(vegetable.name, () => verifyUserSpeech(vegetable.name));
+                speak(veg.name, () => verifyUserSpeech(veg.name));
             } else {
-                speak("நன்றி! தமிழில் காய்கறிகள் நீங்கள் கற்றுக்கொண்டீர்கள்!", () => showPage('thankYou'));
+                speak("நன்றி! தமிழில் காய்கறிகள் நீங்கள் கற்றுக்கொண்டீர்கள்!", () => showPage("thankYou"));
             }
         }
 
         function verifyUserSpeech(correctWord) {
-            if (recognitionActive) return;
-            recognitionActive = true;
-            
             let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             recognition.lang = 'ta-IN';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
             recognition.start();
 
             let timeout = setTimeout(() => {
-                recognitionActive = false;
+                recognition.stop();
                 if (attempts < maxAttempts) {
                     attempts++;
-                    speak("உங்களுக்கு என்ன ஆச்சு? அந்த வார்த்தையை திரும்பவும் சொல்லுங்கள்.", () => verifyUserSpeech(correctWord));
+                    speak("மீண்டும் சொல்லுங்கள்: " + correctWord, () => verifyUserSpeech(correctWord));
                 } else {
-                    speak("நீங்கள் முயற்சியை நிறைவு செய்துவிட்டீர்கள். அடுத்த வார்த்தைக்கு செல்லலாம்.", () => {
+                    speak("அடுத்த வார்த்தைக்கு செல்லலாம்.", () => {
                         index++;
                         startTraining();
                     });
                 }
             }, 7000);
 
-            recognition.onresult = function (event) {
+            recognition.onresult = (event) => {
                 clearTimeout(timeout);
-                recognitionActive = false;
-                let userSpeech = event.results[0][0].transcript.trim();
-
-                if (userSpeech === correctWord) {
-                    speak("நன்றாகப் பேசினீர்! அடுத்த வார்த்தைக்கு செல்லலாம்.", () => {
+                let result = event.results[0][0].transcript.trim();
+                if (result === correctWord) {
+                    speak("நன்றாகப் பேசினீர்! அடுத்தது.", () => {
                         index++;
-                        setTimeout(startTraining, 2000);
+                        startTraining();
                     });
                 } else {
                     if (attempts < maxAttempts) {
                         attempts++;
-                        speak("மீண்டும் முயற்சிக்கவும்: " + correctWord, () => verifyUserSpeech(correctWord));
-                    } 
+                        speak("மீண்டும் முயற்சி செய்யுங்கள்: " + correctWord, () => verifyUserSpeech(correctWord));
+                    } else {
+                        speak("அடுத்த வார்த்தைக்கு செல்லலாம்.", () => {
+                            index++;
+                            startTraining();
+                        });
+                    }
                 }
             };
 
-            recognition.onerror = function () {
+            recognition.onerror = () => {
                 clearTimeout(timeout);
-                recognitionActive = false;
                 if (attempts < maxAttempts) {
                     attempts++;
-                    speak("உங்களுக்கு என்ன ஆச்சு? அந்த வார்த்தையை திரும்பவும் சொல்லுங்கள்.", () => verifyUserSpeech(correctWord));
-                } 
-            };
-
-            recognition.onend = function () {
-                recognitionActive = false;
+                    speak("மீண்டும் சொல்லுங்கள்: " + correctWord, () => verifyUserSpeech(correctWord));
+                } else {
+                    speak("அடுத்த வார்த்தைக்கு செல்லலாம்.", () => {
+                        index++;
+                        startTraining();
+                    });
+                }
             };
         }
     </script>
