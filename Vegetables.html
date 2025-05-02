@@ -85,7 +85,7 @@
             { name: "தக்காளி", image: "assets/images/Vegetables/tomato.jpg" },
             { name: "மாங்காய்", image: "assets/images/Vegetables/raw mango.jpg" },
             { name: "வாழைக்காய்", image: "assets/images/Vegetables/raw banana.jpg" },
-            { name: "பாகற்காய்", image: "assets/images/Vegetables/bitter guard.jpg"}
+            { name: "பாகற்காய்", image: "assets/images/Vegetables/bitter guard.jpg" }
         ];
         let index = 0;
         let attempts = 0;
@@ -104,13 +104,19 @@
         function speak(text, callback) {
             if (speaking) return;
             speaking = true;
-            let audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=gtx&tl=ta&q=${encodeURIComponent(text)}`;
-            let audio = new Audio(audioUrl);
-            audio.onended = function () {
+            
+            // Use Web Speech API for speech synthesis
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ta-IN'; // Set language to Tamil
+
+            // Event listener when the speech has finished
+            utterance.onend = function () {
                 speaking = false;
                 if (callback) callback();
             };
-            audio.play();
+
+            // Start speaking
+            speechSynthesis.speak(utterance);
         }
 
         function startTraining() {
