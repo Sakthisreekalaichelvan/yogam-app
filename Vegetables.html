@@ -61,7 +61,7 @@
         <button onclick="loginUser()">உள்நுழை</button>
     </div>
     
-    <div class="container" id="training" style="display:none;">
+    <div class="container" id="training" style="display:None;">
         <img id="vegetableImage" src="assets/images/FirstPage/VegetableFirstPage.jpeg" alt="Training">
         <h2>தமிழில் காய்கறிகள்</h2>
         <p id="VegetableName"></p>
@@ -76,8 +76,6 @@
     <script>
         let speaking = false;
         let recognitionActive = false;
-        let tamilVoice = null;
-
         const vegetables = [
             { name: "கேரட்", image: "assets/images/Vegetables/Carrot.jpg" },
             { name: "உருளைக்கிழங்கு", image: "assets/images/Vegetables/potato.jpg" },
@@ -93,12 +91,6 @@
         let attempts = 0;
         const maxAttempts = 3;
 
-        // Load Tamil voice
-        window.speechSynthesis.onvoiceschanged = function () {
-            const voices = window.speechSynthesis.getVoices();
-            tamilVoice = voices.find(v => v.lang === 'ta-IN') || null;
-        };
-
         function showPage(page) {
             document.querySelectorAll('.container').forEach(el => el.style.display = 'none');
             document.getElementById(page).style.display = 'block';
@@ -111,24 +103,35 @@
 
         function speak(text, callback) {
             if (speaking) return;
-            speaking = true;
 
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'ta-IN';
-            if (tamilVoice) utterance.voice = tamilVoice;
+            function trySpeak() {
+                speaking = true;
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ta-IN';
 
-            utterance.onend = function () {
-                speaking = false;
-                if (callback) callback();
-            };
+                const voices = speechSynthesis.getVoices();
+                const tamilVoice = voices.find(v => v.lang === 'ta-IN') || voices.find(v => v.lang.startsWith('en'));
+                if (tamilVoice) utterance.voice = tamilVoice;
 
-            utterance.onerror = function () {
-                speaking = false;
-                console.error("Speech synthesis failed.");
-                if (callback) callback();
-            };
+                utterance.onend = function () {
+                    speaking = false;
+                    if (callback) callback();
+                };
 
-            window.speechSynthesis.speak(utterance);
+                utterance.onerror = function () {
+                    console.error("Speech failed.");
+                    speaking = false;
+                    if (callback) callback();
+                };
+
+                speechSynthesis.speak(utterance);
+            }
+
+            if (speechSynthesis.getVoices().length === 0) {
+                speechSynthesis.onvoiceschanged = trySpeak;
+            } else {
+                trySpeak();
+            }
         }
 
         function startTraining() {
@@ -146,7 +149,7 @@
         function verifyUserSpeech(correctWord) {
             if (recognitionActive) return;
             recognitionActive = true;
-
+            
             let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             recognition.lang = 'ta-IN';
             recognition.start();
@@ -178,7 +181,7 @@
                     if (attempts < maxAttempts) {
                         attempts++;
                         speak("மீண்டும் முயற்சிக்கவும்: " + correctWord, () => verifyUserSpeech(correctWord));
-                    }
+                    } 
                 }
             };
 
@@ -188,7 +191,7 @@
                 if (attempts < maxAttempts) {
                     attempts++;
                     speak("உங்களுக்கு என்ன ஆச்சு? அந்த வார்த்தையை திரும்பவும் சொல்லுங்கள்.", () => verifyUserSpeech(correctWord));
-                }
+                } 
             };
 
             recognition.onend = function () {
