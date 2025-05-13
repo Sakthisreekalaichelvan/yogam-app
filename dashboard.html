@@ -3,22 +3,81 @@
 <head>
   <meta charset="UTF-8">
   <title>தமிழ் பயிற்சி திட்டம்</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
   <style>
     body {
       font-family: 'Arial', sans-serif;
-      background: #fefbd8;
-      color: #333;
+      background: url('images/bg-pattern.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
       text-align: center;
-      padding: 50px;
+      padding: 20px;
+      margin: 0;
     }
+
     h1 {
-      color: #444;
+      color: #cde9ff;
+      font-size: 2em;
+      margin-bottom: 20px;
     }
+
+    #message {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      background-color: rgba(0, 0, 50, 0.6);
+      padding: 10px 15px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+
+    .options {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 15px;
+    }
+
     .options img {
-      width: 100px;
-      height: auto;
-      margin: 10px;
+      width: 90px;
+      height: 90px;
+      border-radius: 12px;
+      border: 3px solid #4fc3f7;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      background-color: #fff;
+    }
+
+    .button {
+      background-color: #4fc3f7;
+      color: #003366;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      margin-top: 10px;
+    }
+
+    .button:hover {
+      background-color: #81d4fa;
+    }
+
+    @media screen and (max-width: 600px) {
+      h1 {
+        font-size: 1.5em;
+      }
+
+      #message {
+        font-size: 1em;
+        padding: 8px;
+      }
+
+      .options img {
+        width: 70px;
+        height: 70px;
+      }
     }
   </style>
 </head>
@@ -44,20 +103,16 @@
     };
 
     const schedule = [
-  { time: "08:00", task: "coffeeTea" },
-  { time: "09:00", task: "breakfast" },
-  { time: "10:00", task: "redirect", url: "fruits.html" },
-  { time: "10:30", task: "redirect", url: "vegetables.html" },
-  { time: "13:00", task: "lunch" },
-  { time: "14:00", task: "redirect", url: "birds.html" },
-  { time: "14:30", task: "redirect", url: "animals.html" },
-  { time: "17:00", task: "coffeeTea" },
-  { time: "19:30", task: "dinner" },
-  { time: "20:30", task: "redirect", url: "numbers.html" },
-  { time: "21:00", task: "redirect", url: "vehicles.html" },
-  { time: "21:30", task: "goodNight" }
-];
-
+      { time: "08:00", task: "coffeeTea" },
+      { time: "09:00", task: "breakfast" },
+      { time: "10:00", task: "redirect", url: "fruits.html" },
+      { time: "13:00", task: "lunch" },
+      { time: "14:00", task: "redirect", url: "birds.html" },
+      { time: "17:00", task: "coffeeTea" },
+      { time: "19:30", task: "dinner" },
+      { time: "20:30", task: "redirect", url: "numbers.html" },
+      { time: "21:30", task: "goodNight" }
+    ];
 
     function getTimeString() {
       const now = new Date();
@@ -171,13 +226,14 @@
       const optionsContainer = document.getElementById("optionsContainer");
       options.forEach(item => {
         const img = document.createElement("img");
-        img.src = `images/${item}.png`; // Images should be named in Tamil like "பூரி.png"
+        img.src = `images/${item}.png`; // Ensure these images exist
         img.alt = item;
+        img.title = item;
         optionsContainer.appendChild(img);
       });
     }
 
-    setInterval(checkSchedule, 60000); // check every minute
+    setInterval(checkSchedule, 60000); // Check every minute
     window.onload = checkSchedule;
   </script>
 </body>
