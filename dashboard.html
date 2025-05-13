@@ -1,103 +1,184 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ta">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard</title>
+  <title>தமிழ் பயிற்சி திட்டம்</title>
+  <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
   <style>
     body {
-      font-family: Arial;
-      background: url("assets/images/wallpapers/dashboard.jpeg") no-repeat center center fixed;
-      background-size: cover;
-      margin: 0;
-      padding: 40px 20px;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      box-sizing: border-box;
-    }
-
-    .logo {
-      width: 130px;
-      margin-bottom: 20px;
-    }
-
-    h2 {
-      font-size: 2.2em;
-      margin-bottom: 30px;
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-      color:blue;
-    }
-
-    .menu {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 30px;
-      width: 100%;
-      max-width: 1000px;
-      justify-items: center;
-    }
-
-    .menu a {
-      width: 100%;
-      max-width: 280px;
-      height: 280px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 20px;
-      color: #341fed;
-      font-size: 20px;
-      font-weight: bold;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
-      transition: transform 0.3s ease, background 0.3s ease;
+      font-family: 'Arial', sans-serif;
+      background: #fefbd8;
+      color: #333;
       text-align: center;
+      padding: 50px;
     }
-
-    .menu a:hover {
-      transform: scale(1.05);
-      background: rgba(255, 255, 255, 0.35);
+    h1 {
+      color: #444;
     }
-
-    .menu img {
-      width: 140px;
-      height: 140px;
-      margin-right: 10px;
-    }
-    @media (max-width: 768px) {
-      .menu {
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      }
-
-      .menu a {
-        max-width: 220px;
-        height: 240px;
-      }
-
-      .menu img {
-        width: 100px;
-        height: 100px;
-      }
+    .options img {
+      width: 100px;
+      height: auto;
+      margin: 10px;
     }
   </style>
 </head>
 <body>
-  <!-- Logo at the top -->
-  <img src="assets\images\wallpapers\logo.png" alt="App Logo" class="logo">
+  <h1>தமிழ் தினசரி பயிற்சி</h1>
+  <p id="message">காத்திருக்கவும்...</p>
+  <div class="options" id="optionsContainer"></div>
 
-  <h2>Welcome! Choose a Topic</h2>
+  <script>
+    const spellingMap = {
+      "பூரி": ["ப்", "ஊ", "ரி"],
+      "இட்லி": ["இ", "ட்", "லி"],
+      "தோசை": ["த்", "ஓ", "சை"],
+      "சப்பாத்தி": ["ச்", "அ", "ப்", "பா", "தி"],
+      "பொங்கல்": ["ப்", "ஒ", "ங்", "கல்"],
+      "கிச்சடி": ["க்", "இ", "ச்", "ச", "டி"],
+      "சாம்பார்": ["சா", "ம்", "பா", "ர்"],
+      "ரசம்": ["ர", "ச", "ம்"],
+      "தயிர்": ["த", "யி", "ர்"],
+      "அப்பம்": ["அ", "ப்", "பம்"],
+      "டீ": ["டீ"],
+      "காப்பி": ["கா", "ப்", "பி"]
+    };
 
-  <div class="menu">
-    <a href="./Animals.html"><img src="assets\images\dashboard\animals.jpg" alt="Animals">Animals</a>
-    <a href="./Birds.html"><img src="assets\images\dashboard\birds.jpg" alt="Birds">Birds</a>
-    <a href="./Vehicles.html"><img src="assets\images\dashboard\vehicles.jpg" alt="Vehicles">Vehicles</a>
-    <a href="./Numbers.html"><img src="assets\images\dashboard\numbers.jpeg" alt="Numbers">Numbers</a>
-    <a href="./Testing-fruits.html"><img src="assets\images\dashboard\fruits.jpg" alt="Fruits">Fruits</a>
-    <a href="./Vegetables.html"><img src="assets\images\dashboard\vegetable.jpeg" alt="Fruits">Vegetables</a>
-  </div>
+    const schedule = [
+  { time: "08:00", task: "coffeeTea" },
+  { time: "09:00", task: "breakfast" },
+  { time: "10:00", task: "redirect", url: "fruits.html" },
+  { time: "10:30", task: "redirect", url: "vegetables.html" },
+  { time: "13:00", task: "lunch" },
+  { time: "14:00", task: "redirect", url: "birds.html" },
+  { time: "14:30", task: "redirect", url: "animals.html" },
+  { time: "17:00", task: "coffeeTea" },
+  { time: "19:30", task: "dinner" },
+  { time: "20:30", task: "redirect", url: "numbers.html" },
+  { time: "21:00", task: "redirect", url: "vehicles.html" },
+  { time: "21:30", task: "goodNight" }
+];
+
+
+    function getTimeString() {
+      const now = new Date();
+      return now.toTimeString().slice(0, 5);
+    }
+
+    function checkSchedule() {
+      const nowTime = getTimeString();
+      schedule.forEach(item => {
+        if (nowTime === item.time) {
+          runTask(item.task, item.url);
+        }
+      });
+    }
+
+    function spellTamilWord(word, callback) {
+      const letters = spellingMap[word] || [];
+      let delay = 0;
+      letters.forEach((letter, index) => {
+        setTimeout(() => {
+          responsiveVoice.speak(letter, "Tamil Female");
+          if (index === letters.length - 1 && callback) {
+            setTimeout(callback, 1000);
+          }
+        }, delay);
+        delay += 800;
+      });
+    }
+
+    function runTask(task, url = "") {
+      const message = document.getElementById("message");
+      const optionsContainer = document.getElementById("optionsContainer");
+      optionsContainer.innerHTML = "";
+
+      const recognizer = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognizer.lang = "ta-IN";
+      recognizer.interimResults = false;
+
+      function askAndValidate(options, questionText) {
+        let delay = 0;
+        responsiveVoice.speak(questionText + " விருப்பங்கள்:", "Tamil Female");
+        options.forEach(option => {
+          setTimeout(() => {
+            responsiveVoice.speak(option, "Tamil Female");
+            spellTamilWord(option);
+          }, delay);
+          delay += 4000;
+        });
+
+        setTimeout(() => {
+          responsiveVoice.speak("தயவு செய்து உங்களுடைய பதிலை சொல்லுங்கள்", "Tamil Female");
+          recognizer.start();
+        }, delay + 1000);
+
+        recognizer.onresult = function(event) {
+          const userAnswer = event.results[0][0].transcript.trim();
+          console.log("User said:", userAnswer);
+          if (options.includes(userAnswer)) {
+            responsiveVoice.speak("உங்கள் பதில் சரியானது!", "Tamil Female");
+          } else {
+            responsiveVoice.speak("பிழை. சரியான பதில்களில் ஒன்றை தெரிவுசெய்யவும்.", "Tamil Female");
+            options.forEach(option => responsiveVoice.speak(option, "Tamil Female"));
+          }
+        };
+      }
+
+      switch (task) {
+        case "coffeeTea":
+          const drinks = ["காப்பி", "டீ"];
+          message.innerText = "காலை வணக்கம்! காப்பி அல்லது டீ குடித்தீர்களா?";
+          askAndValidate(drinks, "காலை வணக்கம்! காப்பி அல்லது டீ குடித்தீர்களா?");
+          break;
+
+        case "breakfast":
+          const breakfast = ["இட்லி", "தோசை", "பூரி", "சப்பாத்தி", "பொங்கல்", "கிச்சடி"];
+          message.innerText = "காலை உணவுக்கு என்ன சாப்பிட்டீர்கள்?";
+          showImages(breakfast);
+          askAndValidate(breakfast, "காலை உணவுக்கு என்ன சாப்பிட்டீர்கள்?");
+          break;
+
+        case "lunch":
+          const lunch = ["சாம்பார்", "ரசம்", "தயிர்"];
+          message.innerText = "மதிய உணவுக்கு என்ன சாப்பிட்டீர்கள்?";
+          showImages(lunch);
+          askAndValidate(lunch, "மதிய உணவுக்கு என்ன சாப்பிட்டீர்கள்?");
+          break;
+
+        case "dinner":
+          const dinner = ["இட்லி", "தோசை", "சப்பாத்தி", "அப்பம்"];
+          message.innerText = "இரவு உணவுக்கு என்ன சாப்பிட்டீர்கள்?";
+          showImages(dinner);
+          askAndValidate(dinner, "இரவு உணவுக்கு என்ன சாப்பிட்டீர்கள்?");
+          break;
+
+        case "redirect":
+          message.innerText = "பக்கம் மாற்றப்படுகிறது...";
+          responsiveVoice.speak("புதிய பக்கம் திறக்கப்படுகிறது", "Tamil Female");
+          setTimeout(() => {
+            window.location.href = url;
+          }, 3000);
+          break;
+
+        case "goodNight":
+          message.innerText = "இனிய இரவு வாழ்த்துகள்!";
+          responsiveVoice.speak("இனிய இரவு வாழ்த்துகள்! நலமாக தூங்குங்கள்!", "Tamil Female");
+          break;
+      }
+    }
+
+    function showImages(options) {
+      const optionsContainer = document.getElementById("optionsContainer");
+      options.forEach(item => {
+        const img = document.createElement("img");
+        img.src = `images/${item}.png`; // Images should be named in Tamil like "பூரி.png"
+        img.alt = item;
+        optionsContainer.appendChild(img);
+      });
+    }
+
+    setInterval(checkSchedule, 60000); // check every minute
+    window.onload = checkSchedule;
+  </script>
 </body>
 </html>
