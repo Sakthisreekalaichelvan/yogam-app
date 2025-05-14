@@ -8,8 +8,10 @@
     body {
       font-family: 'Arial', sans-serif;
       text-align: center;
-      background-color: #f0f8ff;
+      background: url('assets/images/dashboard.jpg') no-repeat center center fixed;
+      background-size: cover;
       padding: 40px;
+      color: #fff;
     }
     button {
       font-size: 18px;
@@ -25,7 +27,8 @@
       background-color: #45a049;
     }
     h1 {
-      color: #333;
+      color: #fff;
+      text-shadow: 2px 2px 4px #000;
     }
   </style>
 </head>
@@ -48,61 +51,40 @@
       responsiveVoice.speak(message, "Tamil Female");
     }
 
-    function runTask(taskType, page = "") {
-      switch (taskType) {
-        case "coffeeTea":
-          responsiveVoice.speak("இப்போது உங்கள் காலை அல்லது மாலை பானத்தை அருந்துங்கள்.", "Tamil Female");
-          break;
-        case "breakfast":
-          responsiveVoice.speak("இப்போது காலை உணவைச் சாப்பிடுங்கள்.", "Tamil Female");
-          break;
-        case "lunch":
-          responsiveVoice.speak("இப்போது மதிய உணவை எடுத்துக்கொள்ளவும்.", "Tamil Female");
-          break;
-        case "dinner":
-          responsiveVoice.speak("இப்போது இரவு உணவை எடுத்துக்கொள்ளவும்.", "Tamil Female");
-          break;
-        case "redirect":
-          responsiveVoice.speak("தயவுசெய்து இந்த பக்கத்திற்குச் செல்லுங்கள்.", "Tamil Female");
-          setTimeout(() => {
-            window.location.href = page;
-          }, 3000);
-          break;
-        case "goodNight":
-          responsiveVoice.speak("இன்றைய நாள் முடிந்தது. இனிய இரவு.", "Tamil Female");
-          break;
-        default:
-          responsiveVoice.speak("தற்போதைய நேரத்திற்கு திட்டமிடல் இல்லை.", "Tamil Female");
-      }
+    function redirectTo(page, speakText) {
+      responsiveVoice.speak(speakText, "Tamil Female");
+      setTimeout(() => {
+        window.location.href = page;
+      }, 3000);
     }
 
     function scheduleLogic() {
       const mins = getCurrentMinutes();
 
       if (mins >= 480 && mins < 510) {
-        runTask("coffeeTea"); // 8:00 - 8:30 AM
+        redirectTo("morningWish.html", "காலை வணக்கம்! இன்று ஒரு அருமையான நாளாக இருக்கட்டும்.");
       } else if (mins >= 510 && mins < 540) {
-        runTask("breakfast"); // 8:30 - 9:00 AM
+        redirectTo("breakfast.html", "இப்போது காலை உணவைச் சாப்பிடுங்கள்.");
       } else if (mins >= 540 && mins < 570) {
-        runTask("redirect", "Testing-fruits.html"); // 9:00 - 9:30 AM
-      } else if (mins >= 660 && mins < 690) {
-        runTask("redirect", "Vegetables.html"); // ✅ 9:30 - 10:00 AM
+        redirectTo("Testing-fruits.html", "இந்த பழங்களைப் பற்றிப் படிக்கலாம்.");
+      } else if (mins >= 570 && mins < 600) {
+        redirectTo("Vegetables.html", "இப்போது காய்கறிகளைப் பற்றி தெரிந்துகொள்வோம்.");
       } else if (mins >= 720 && mins < 750) {
-        runTask("lunch"); // 12:00 - 12:30 PM
+        redirectTo("lunch.html", "இப்போது மதிய உணவை எடுத்துக்கொள்ளவும்.");
       } else if (mins >= 750 && mins < 780) {
-        runTask("redirect", "Birds.html"); // 12:30 - 1:00 PM
+        redirectTo("Birds.html", "பறவைகள் பற்றிய தகவல்களுக்கு செல்லுங்கள்.");
       } else if (mins >= 780 && mins < 810) {
-        runTask("redirect", "Animals.html"); // 1:00 - 1:30 PM
+        redirectTo("Animals.html", "இப்போது விலங்குகளைப் பற்றி தெரிந்துகொள்வோம்.");
       } else if (mins >= 1080 && mins < 1110) {
-        runTask("coffeeTea"); // 6:00 - 6:30 PM
+        redirectTo("eveningWish.html", "மாலை வணக்கம்! எப்படி இருந்தது இன்றைய நாள்?");
+      } else if (mins >= 1110 && mins < 1140) {
+        redirectTo("dinner.html", "இப்போது இரவு உணவை எடுத்துக்கொள்ளவும்.");
       } else if (mins >= 1140 && mins < 1170) {
-        runTask("dinner"); // 7:00 - 7:30 PM
+        redirectTo("Numbers.html", "இப்போது எண்கள் பற்றிய பயிற்சிக்கு செல்லலாம்.");
       } else if (mins >= 1170 && mins < 1200) {
-        runTask("redirect", "Numbers.html"); // 7:30 - 8:00 PM
-      } else if (mins >= 1200 && mins < 1230) {
-        runTask("redirect", "Vehicles.html"); // 8:00 - 8:30 PM
+        redirectTo("Vehicles.html", "வாகனங்களைப் பற்றி தெரிந்து கொள்வோம்.");
       } else if (mins >= 1260) {
-        runTask("goodNight"); // After 9:00 PM
+        redirectTo("night.html", "இனி இரவு நேரம்! இனிய கனவுகள். மாத்திரைகளை எடுத்துக்கொள்ள மறக்காதீர்கள்.");
       } else {
         responsiveVoice.speak("தற்போதைய நேரத்திற்கு திட்டமிடல் இல்லை.", "Tamil Female");
       }
