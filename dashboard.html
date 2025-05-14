@@ -120,27 +120,44 @@
     const schedule = [
       { time: "08:00", task: "coffeeTea" },
       { time: "09:00", task: "breakfast" },
-      { time: "10:00", task: "redirect", url: "fruits.html" },
+      { time: "10:00", task: "redirect", url: "Testing-fruits.html" },
+      { time: "10:30", task: "redirect", url: "Vegetables.html" },
       { time: "13:00", task: "lunch" },
-      { time: "14:00", task: "redirect", url: "birds.html" },
+      { time: "14:00", task: "redirect", url: "Birds.html" },
+      { time: "14:30", task: "redirect", url: "Animals.html" },
       { time: "17:00", task: "coffeeTea" },
       { time: "19:30", task: "dinner" },
-      { time: "20:30", task: "redirect", url: "numbers.html" },
+      { time: "20:30", task: "redirect", url: "Numbers.html" },
+      { time: "21:00", task: "redirect", url: "Vehicles.html" },
       { time: "21:30", task: "goodNight" }
     ];
 
-    function getTimeString() {
+    let currentTaskIndex = 0;
+    let isTaskRunning = false;
+
+    function getTimeInMinutes(timeStr) {
+      const [h, m] = timeStr.split(":").map(Number);
+      return h * 60 + m;
+    }
+
+    function getCurrentTimeInMinutes() {
       const now = new Date();
-      return now.toTimeString().slice(0, 5);
+      return now.getHours() * 60 + now.getMinutes();
     }
 
     function checkSchedule() {
-      const nowTime = getTimeString();
-      schedule.forEach(item => {
-        if (nowTime === item.time) {
-          runTask(item.task, item.url);
-        }
-      });
+      if (isTaskRunning || currentTaskIndex >= schedule.length) return;
+
+      const now = getCurrentTimeInMinutes();
+      const taskTime = getTimeInMinutes(schedule[currentTaskIndex].time);
+
+      if (now >= taskTime - 30 && now <= taskTime + 5) {
+        isTaskRunning = true;
+        runTask(schedule[currentTaskIndex].task, schedule[currentTaskIndex].url, () => {
+          currentTaskIndex++;
+          isTaskRunning = false;
+        });
+      }
     }
 
     function spellTamilWord(word, callback) {
@@ -157,7 +174,7 @@
       });
     }
 
-    function runTask(task, url = "") {
+    function runTask(task, url = "", onComplete = () => {}) {
       const message = document.getElementById("message");
       const optionsContainer = document.getElementById("optionsContainer");
       optionsContainer.innerHTML = "";
@@ -190,6 +207,7 @@
             responsiveVoice.speak("பிழை. மீண்டும் முயற்சிக்கவும்.", "Tamil Female");
             options.forEach(option => responsiveVoice.speak(option, "Tamil Female"));
           }
+          setTimeout(onComplete, 5000); // Proceed to next task after a delay
         };
       }
 
@@ -232,7 +250,11 @@
         case "goodNight":
           message.innerText = "இனிய இரவு வாழ்த்துகள்!";
           responsiveVoice.speak("இனிய இரவு வாழ்த்துகள்! நலமாக தூங்குங்கள்!", "Tamil Female");
+          setTimeout(onComplete, 5000);
           break;
+
+        default:
+          onComplete();
       }
     }
 
@@ -240,7 +262,7 @@
       const optionsContainer = document.getElementById("optionsContainer");
       options.forEach(item => {
         const img = document.createElement("img");
-        img.src = `assets/images/dashboard/${item}.png`; // ✅ UPDATED PATH
+        img.src = `assets/images/dashboard/${item}.png`;
         img.alt = item;
         img.title = item;
         optionsContainer.appendChild(img);
