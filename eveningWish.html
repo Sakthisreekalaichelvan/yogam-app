@@ -98,12 +98,31 @@
   <script>
     let recognition;
     let isComplete = false;
+    let isRetrying = false;
 
     function speakTamil(text, callback) {
       responsiveVoice.speak(text, "Tamil Male", {
-        rate: 0.9,
+        rate: 1.0,
         onend: callback
       });
+    }
+
+    function normalize(text) {
+      return text.toLowerCase()
+        .replace(/[.,?!\s]/g, "")  // Remove punctuation and spaces
+        .replace(" ", "")
+        .trim();
+    }
+
+    function isValidResponse(userSpeech) {
+      const cleanText = normalize(userSpeech);
+      return (
+        cleanText.includes("காபி") ||
+        cleanText.includes("தேநீர்") ||    // Just in case it captures half word
+        cleanText.includes("காப") ||
+        cleanText.includes("tea") ||
+        cleanText.includes("coffee")
+      );
     }
 
     function stopRecognition() {
@@ -114,7 +133,7 @@
     }
 
     function startRecognition() {
-      if (isComplete) return;
+      if (isComplete || isRetrying) return;
 
       recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
       recognition.lang = "ta-IN";
@@ -124,42 +143,47 @@
       recognition.start();
 
       recognition.onresult = function(event) {
-        const userSpeech = event.results[0][0].transcript.toLowerCase();
+        const userSpeech = event.results[0][0].transcript;
         document.getElementById("status").textContent = "நீங்கள் சொன்னது: " + userSpeech;
 
-        if (userSpeech.includes("காபி") || userSpeech.includes("தேநீர்")) {
+        if (isValidResponse(userSpeech)) {
           isComplete = true;
           stopRecognition();
           speakTamil("பதில் சரியாக உள்ளது. உங்களுக்கு இன்று ஒரு சிறந்த நாள் அமைய வாழ்த்துகள்.");
           document.getElementById("status").textContent = "✅ பதில் சரியாக உள்ளது!";
         } else {
+          isRetrying = true;
           document.getElementById("status").textContent = "❌ தவறான பதில். மீண்டும் சொல்லவும்...";
-          speakTamil("தவறான பதில். தயவுசெய்து மீண்டும் சொல்லவும்.", function() {
-            if (!isComplete) setTimeout(startRecognition, 5000);
+          speakTamil("தவறான பதில். தயவுசெய்து மீண்டும் சொல்லவும்.", function () {
+            isRetrying = false;
+            if (!isComplete) startRecognition();
           });
         }
       };
 
-      recognition.onerror = function() {
-        if (!isComplete) {
+      recognition.onerror = function(event) {
+        if (!isComplete && !isRetrying) {
+          isRetrying = true;
           document.getElementById("status").textContent = "⚠️ பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்...";
-          speakTamil("சிக்கல் ஏற்பட்டது. தயவுசெய்து மீண்டும் சொல்லவும்.", function() {
-            if (!isComplete) setTimeout(startRecognition, 5000);
+          speakTamil("சிக்கல் ஏற்பட்டது. தயவுசெய்து மீண்டும் சொல்லவும்.", function () {
+            isRetrying = false;
+            if (!isComplete) startRecognition();
           });
         }
       };
 
-      recognition.onend = function() {
-        if (!isComplete) {
-          setTimeout(startRecognition, 4000);
+      recognition.onend = function () {
+        if (!isComplete && !isRetrying) {
+          startRecognition();
         }
       };
     }
 
     function startInteraction() {
       isComplete = false;
+      isRetrying = false;
       document.getElementById("status").textContent = "🎤 கேள்வி கேட்கப்படுகிறது...";
-      speakTamil("காலை வணக்கம்! இன்று காபி அல்லது தேயிலை குடித்தீர்களா?", function() {
+      speakTamil("மாலை வணக்கம்! இன்று காபி அல்லது தேயிலை குடித்தீர்களா?", function () {
         startRecognition();
       });
     }
