@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8">
+  <title>காபி அல்லது தேயிலை</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fffaf2;
+      text-align: center;
+      padding: 40px;
+    }
+
+    h1 {
+      color: #2c3e50;
+    }
+
+    img {
+      width: 200px;
+      margin: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    #status {
+      margin-top: 30px;
+      font-size: 22px;
+      color: #8e44ad;
+    }
+
+    button {
+      padding: 15px 30px;
+      font-size: 20px;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2ecc71;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>காலை வணக்கம்!</h1>
+  <p>இன்று காபி அல்லது தேயிலை குடித்தீர்களா?</p>
+
+  <img src="https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG" alt="காபி">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/Tea_cup_001.jpg" alt="தேயிலை">
+
+  <br><br>
+  <button onclick="startInteraction()">தொடங்க</button>
+
+  <div id="status">தொடங்க 'தொடங்க' என்பதை அழுத்தவும்</div>
+
+  <script src="https://code.responsivevoice.org/responsivevoice.js?key=ng4M6EUA"></script>
+
+  <script>
+    let recognition;
+    let isComplete = false;
+
+    function speakTamil(text, callback) {
+      responsiveVoice.speak(text, "Tamil Male", {
+        rate: 0.9,
+        onend: callback
+      });
+    }
+
+    function stopRecognition() {
+      if (recognition) {
+        recognition.stop();
+        recognition = null;
+      }
+    }
+
+    function startRecognition() {
+      if (isComplete) return;
+
+      recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = "ta-IN";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const userSpeech = event.results[0][0].transcript.toLowerCase();
+        document.getElementById("status").textContent = "நீங்கள் சொன்னது: " + userSpeech;
+
+        if (userSpeech.includes("காபி") || userSpeech.includes("தேயிலை")) {
+          isComplete = true;
+          stopRecognition();
+          speakTamil("பதில் சரியாக உள்ளது. உங்களுக்கு இன்று ஒரு சிறந்த நாள் அமைய வாழ்த்துகள்.");
+          document.getElementById("status").textContent = "பதில் சரியாக உள்ளது!";
+        } else {
+          document.getElementById("status").textContent = "தவறான பதில். மீண்டும் சொல்லவும்...";
+          speakTamil("தவறான பதில். தயவுசெய்து மீண்டும் சொல்லவும்.", function() {
+            if (!isComplete) setTimeout(startRecognition, 5000);
+          });
+        }
+      };
+
+      recognition.onerror = function() {
+        if (!isComplete) {
+          document.getElementById("status").textContent = "பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்...";
+          speakTamil("சிக்கல் ஏற்பட்டது. தயவுசெய்து மீண்டும் சொல்லவும்.", function() {
+            if (!isComplete) setTimeout(startRecognition, 5000);
+          });
+        }
+      };
+
+      recognition.onend = function() {
+        if (!isComplete) {
+          setTimeout(startRecognition, 4000);
+        }
+      };
+    }
+
+    function startInteraction() {
+      isComplete = false;
+      document.getElementById("status").textContent = "கேள்வி கேட்கப்படுகிறது...";
+      speakTamil("காலை வணக்கம்! இன்று காபி அல்லது தேயிலை குடித்தீர்களா?", function() {
+        startRecognition();
+      });
+    }
+  </script>
+
+</body>
+</html>
