@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8">
+  <title>காபி அல்லது தேநீர்</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: url('assets/images/dashboard/evening.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      text-align: center;
+    }
+
+    .container {
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 50px 20px;
+      margin: 60px auto;
+      max-width: 800px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    h1 {
+      font-size: 48px;
+      margin-bottom: 10px;
+      color: #f1c40f;
+    }
+
+    p {
+      font-size: 24px;
+      margin-bottom: 30px;
+    }
+
+    .images {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .images img {
+      width: 180px;
+      border-radius: 15px;
+      transition: transform 0.3s;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    }
+
+    .images img:hover {
+      transform: scale(1.05);
+    }
+
+    button {
+      padding: 15px 40px;
+      font-size: 20px;
+      margin-top: 30px;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #2ecc71;
+      transform: scale(1.05);
+    }
+
+    #status {
+      margin-top: 25px;
+      font-size: 22px;
+      color: #ecf0f1;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>மாலை வணக்கம்!</h1>
+    <p>இன்று காபி அல்லது தேநீர் குடித்தீர்களா?</p>
+
+    <div class="images">
+      <img src="assets/images/dashboard/காபி.jpg" alt="காபி">
+      <img src="assets/images/dashboard/தேநீர்.jpg" alt="தேநீர்">
+    </div>
+
+    <button onclick="startInteraction()">தொடங்க</button>
+
+    <div id="status">தொடங்க 'தொடங்க' என்பதை அழுத்தவும்</div>
+  </div>
+
+  <script src="https://code.responsivevoice.org/responsivevoice.js?key=ng4M6EUA"></script>
+
+  <script>
+    let recognition;
+    let isComplete = false;
+
+    function speakTamil(text, callback) {
+      responsiveVoice.speak(text, "Tamil Male", {
+        rate: 0.9,
+        onend: callback
+      });
+    }
+
+    function stopRecognition() {
+      if (recognition) {
+        recognition.stop();
+        recognition = null;
+      }
+    }
+
+    function startRecognition() {
+      if (isComplete) return;
+
+      recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = "ta-IN";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const userSpeech = event.results[0][0].transcript.toLowerCase();
+        document.getElementById("status").textContent = "நீங்கள் சொன்னது: " + userSpeech;
+
+        if (userSpeech.includes("காபி") || userSpeech.includes("தேநீர்")) {
+          isComplete = true;
+          stopRecognition();
+          speakTamil("பதில் சரியாக உள்ளது. உங்களுக்கு இன்று ஒரு சிறந்த நாள் அமைய வாழ்த்துகள்.");
+          document.getElementById("status").textContent = "✅ பதில் சரியாக உள்ளது!";
+        } else {
+          document.getElementById("status").textContent = "❌ தவறான பதில். மீண்டும் சொல்லவும்...";
+          speakTamil("தவறான பதில். தயவுசெய்து மீண்டும் சொல்லவும்.", function() {
+            if (!isComplete) setTimeout(startRecognition, 5000);
+          });
+        }
+      };
+
+      recognition.onerror = function() {
+        if (!isComplete) {
+          document.getElementById("status").textContent = "⚠️ பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்...";
+          speakTamil("சிக்கல் ஏற்பட்டது. தயவுசெய்து மீண்டும் சொல்லவும்.", function() {
+            if (!isComplete) setTimeout(startRecognition, 5000);
+          });
+        }
+      };
+
+      recognition.onend = function() {
+        if (!isComplete) {
+          setTimeout(startRecognition, 4000);
+        }
+      };
+    }
+
+    function startInteraction() {
+      isComplete = false;
+      document.getElementById("status").textContent = "🎤 கேள்வி கேட்கப்படுகிறது...";
+      speakTamil("காலை வணக்கம்! இன்று காபி அல்லது தேயிலை குடித்தீர்களா?", function() {
+        startRecognition();
+      });
+    }
+  </script>
+
+</body>
+</html>
