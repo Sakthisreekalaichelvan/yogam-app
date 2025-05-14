@@ -2,71 +2,127 @@
 <html lang="ta">
 <head>
   <meta charset="UTF-8">
-  <title>காபி அல்லது தேயிலை</title>
+  <title>காபி அல்லது தேநீர்</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #fffaf2;
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: url('assets/images/dashboard/morning.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
       text-align: center;
-      padding: 40px;
+    }
+
+    .container {
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 50px 20px;
+      margin: 60px auto;
+      max-width: 800px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
     }
 
     h1 {
-      color: #2c3e50;
+      font-size: 48px;
+      margin-bottom: 10px;
+      color: #f1c40f;
     }
 
-    img {
-      width: 200px;
-      margin: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    p {
+      font-size: 24px;
+      margin-bottom: 30px;
     }
 
-    #status {
-      margin-top: 30px;
-      font-size: 22px;
-      color: #8e44ad;
+    .images {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .images img {
+      width: 180px;
+      border-radius: 15px;
+      transition: transform 0.3s;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    }
+
+    .images img:hover {
+      transform: scale(1.05);
     }
 
     button {
-      padding: 15px 30px;
+      padding: 15px 40px;
       font-size: 20px;
+      margin-top: 30px;
       background-color: #27ae60;
       color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 50px;
       cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
     }
 
     button:hover {
       background-color: #2ecc71;
+      transform: scale(1.05);
+    }
+
+    #status {
+      margin-top: 25px;
+      font-size: 22px;
+      color: #ecf0f1;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-  <h1>காலை வணக்கம்!</h1>
-  <p>இன்று காபி அல்லது தேயிலை குடித்தீர்களா?</p>
+  <div class="container">
+    <h1>காலை வணக்கம்!</h1>
+    <p>இன்று காபி அல்லது தேநீர் குடித்தீர்களா?</p>
 
-  <img src="https://upload.wikimedia.org/wikipedia/commons/4/45/A_small_cup_of_coffee.JPG" alt="காபி">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/Tea_cup_001.jpg" alt="தேயிலை">
+    <div class="images">
+      <img src="assets/images/dashboard/காபி.jpg" alt="காபி">
+      <img src="assets/images/dashboard/தேநீர்.jpg" alt="தேநீர்">
+    </div>
 
-  <br><br>
-  <button onclick="startInteraction()">தொடங்க</button>
+    <button onclick="startInteraction()">தொடங்க</button>
 
-  <div id="status">தொடங்க 'தொடங்க' என்பதை அழுத்தவும்</div>
+    <div id="status">தொடங்க 'தொடங்க' என்பதை அழுத்தவும்</div>
+  </div>
 
   <script src="https://code.responsivevoice.org/responsivevoice.js?key=ng4M6EUA"></script>
 
   <script>
     let recognition;
     let isComplete = false;
+    let isRetrying = false;
 
     function speakTamil(text, callback) {
       responsiveVoice.speak(text, "Tamil Male", {
-        rate: 0.9,
+        rate: 1.0,
         onend: callback
       });
+    }
+
+    function normalize(text) {
+      return text.toLowerCase()
+        .replace(/[.,?!\s]/g, "")  // Remove punctuation and spaces
+        .replace(" ", "")
+        .trim();
+    }
+
+    function isValidResponse(userSpeech) {
+      const cleanText = normalize(userSpeech);
+      return (
+        cleanText.includes("காபி") ||
+        cleanText.includes("தேநீர்") ||    // Just in case it captures half word
+        cleanText.includes("காப") ||
+        cleanText.includes("tea") ||
+        cleanText.includes("coffee")
+      );
     }
 
     function stopRecognition() {
@@ -77,7 +133,7 @@
     }
 
     function startRecognition() {
-      if (isComplete) return;
+      if (isComplete || isRetrying) return;
 
       recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
       recognition.lang = "ta-IN";
@@ -87,42 +143,47 @@
       recognition.start();
 
       recognition.onresult = function(event) {
-        const userSpeech = event.results[0][0].transcript.toLowerCase();
+        const userSpeech = event.results[0][0].transcript;
         document.getElementById("status").textContent = "நீங்கள் சொன்னது: " + userSpeech;
 
-        if (userSpeech.includes("காபி") || userSpeech.includes("தேயிலை")) {
+        if (isValidResponse(userSpeech)) {
           isComplete = true;
           stopRecognition();
           speakTamil("பதில் சரியாக உள்ளது. உங்களுக்கு இன்று ஒரு சிறந்த நாள் அமைய வாழ்த்துகள்.");
-          document.getElementById("status").textContent = "பதில் சரியாக உள்ளது!";
+          document.getElementById("status").textContent = "✅ பதில் சரியாக உள்ளது!";
         } else {
-          document.getElementById("status").textContent = "தவறான பதில். மீண்டும் சொல்லவும்...";
-          speakTamil("தவறான பதில். தயவுசெய்து மீண்டும் சொல்லவும்.", function() {
-            if (!isComplete) setTimeout(startRecognition, 5000);
+          isRetrying = true;
+          document.getElementById("status").textContent = "❌ தவறான பதில். மீண்டும் சொல்லவும்...";
+          speakTamil("தவறான பதில். தயவுசெய்து மீண்டும் சொல்லவும்.", function () {
+            isRetrying = false;
+            if (!isComplete) startRecognition();
           });
         }
       };
 
-      recognition.onerror = function() {
-        if (!isComplete) {
-          document.getElementById("status").textContent = "பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்...";
-          speakTamil("சிக்கல் ஏற்பட்டது. தயவுசெய்து மீண்டும் சொல்லவும்.", function() {
-            if (!isComplete) setTimeout(startRecognition, 5000);
+      recognition.onerror = function(event) {
+        if (!isComplete && !isRetrying) {
+          isRetrying = true;
+          document.getElementById("status").textContent = "⚠️ பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்...";
+          speakTamil("சிக்கல் ஏற்பட்டது. தயவுசெய்து மீண்டும் சொல்லவும்.", function () {
+            isRetrying = false;
+            if (!isComplete) startRecognition();
           });
         }
       };
 
-      recognition.onend = function() {
-        if (!isComplete) {
-          setTimeout(startRecognition, 4000);
+      recognition.onend = function () {
+        if (!isComplete && !isRetrying) {
+          startRecognition();
         }
       };
     }
 
     function startInteraction() {
       isComplete = false;
-      document.getElementById("status").textContent = "கேள்வி கேட்கப்படுகிறது...";
-      speakTamil("காலை வணக்கம்! இன்று காபி அல்லது தேயிலை குடித்தீர்களா?", function() {
+      isRetrying = false;
+      document.getElementById("status").textContent = "🎤 கேள்வி கேட்கப்படுகிறது...";
+      speakTamil("காலை வணக்கம்! இன்று காபி அல்லது தேயிலை குடித்தீர்களா?", function () {
         startRecognition();
       });
     }
